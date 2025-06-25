@@ -54,7 +54,7 @@ export default function AdminPage() {
                 toast.success('User created');
             }
             handleClose();
-            fetchUsers();
+            await fetchUsers();
         } catch (err) {
             toast.error(err.response?.data?.message || err.message || 'Error saving user');
         }
@@ -74,7 +74,7 @@ export default function AdminPage() {
         try {
             await axios.delete(`/users/${id}`);
             toast.success('User deleted');
-            fetchUsers();
+            await fetchUsers();
         } catch (err) {
             toast.error(err.response?.data?.message || err.message || 'Delete failed');
         }
@@ -131,8 +131,8 @@ export default function AdminPage() {
                 </Modal.Header>
                 <Modal.Body>
                     <Form onSubmit={handleSubmit}>
-                        <Form.Group className="mb-3">
-                            <Form.Label>Username</Form.Label>
+                        <Form.Group controlId="name" className="mb-3">
+                            <Form.Label column="">Username</Form.Label>
                             <Form.Control
                                 required
                                 value={formData.name}
@@ -142,8 +142,8 @@ export default function AdminPage() {
                             />
                         </Form.Group>
 
-                        <Form.Group className="mb-3">
-                            <Form.Label>Password {editingUser ? '(leave blank to keep current)' : ''}</Form.Label>
+                        <Form.Group controlId="password" className="mb-3">
+                            <Form.Label column="">Password {editingUser ? '(leave blank to keep current)' : ''}</Form.Label>
                             <Form.Control
                                 type="password"
                                 value={formData.password}

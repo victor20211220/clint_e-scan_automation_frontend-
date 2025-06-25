@@ -45,41 +45,41 @@ export default function NominationForm({isEdit = false, initialValues = {}}) {
         <Form onSubmit={handleSubmit}>
             <Row>
                 <Col md={6}>
-                    <Form.Group className="mb-3">
-                        <Form.Label>Contract Name</Form.Label>
+                    <Form.Group controlId="contract_name" className="mb-3">
+                        <Form.Label column="">Contract Name</Form.Label>
                         <Form.Control name="contract_name" value={formData.contract_name} onChange={handleChange}
                                       required/>
                     </Form.Group>
-                    <Form.Group className="mb-3">
-                        <Form.Label>Buyer</Form.Label>
+                    <Form.Group controlId="buyer" className="mb-3">
+                        <Form.Label column="">Buyer</Form.Label>
                         <Form.Control name="buyer" value={formData.buyer} onChange={handleChange} required/>
                     </Form.Group>
-                    <Form.Group className="mb-3">
-                        <Form.Label>Seller</Form.Label>
+                    <Form.Group controlId="seller" className="mb-3">
+                        <Form.Label column="">Seller</Form.Label>
                         <Form.Control name="seller" value={formData.seller} onChange={handleChange} required/>
                     </Form.Group>
-                    <Form.Group className="mb-3">
-                        <Form.Label>Arrival Period</Form.Label>
+                    <Form.Group controlId="arrival_period" className="mb-3">
+                        <Form.Label column="">Arrival Period</Form.Label>
                         <Form.Control type="date" name="arrival_period" value={formData.arrival_period}
                                       onChange={handleChange} required/>
                     </Form.Group>
-                    <Form.Group className="mb-3">
-                        <Form.Label>Nomination Date</Form.Label>
+                    <Form.Group controlId="nomination_date" className="mb-3">
+                        <Form.Label column="">Nomination Date</Form.Label>
                         <Form.Control type="date" name="nomination_date" value={formData.nomination_date}
                                       onChange={handleChange} required/>
                     </Form.Group>
-                    <Form.Group className="mb-3">
-                        <Form.Label>Nomination Type</Form.Label>
+                    <Form.Group controlId="nomination_type" className="mb-3">
+                        <Form.Label column="">Nomination Type</Form.Label>
                         <Form.Control name="nomination_type" value={formData.nomination_type} onChange={handleChange}
                                       required/>
                     </Form.Group>
-                    <Form.Group className="mb-3">
-                        <Form.Label>Nomination Keyword</Form.Label>
+                    <Form.Group controlId="nomination_keyword" className="mb-3">
+                        <Form.Label column="">Nomination Keyword</Form.Label>
                         <Form.Control name="nomination_keyword" value={formData.nomination_keyword}
                                       onChange={handleChange} required/>
                     </Form.Group>
-                    <Form.Group className="mb-3">
-                        <Form.Label>For</Form.Label>
+                    <Form.Group controlId="for_seller_or_buyer" className="mb-3">
+                        <Form.Label column="">For</Form.Label>
                         <Form.Select name="for_seller_or_buyer" value={formData.for_seller_or_buyer}
                                      onChange={handleChange}>
                             <option value="seller">Seller</option>

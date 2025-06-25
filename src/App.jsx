@@ -5,6 +5,8 @@ import Dashboard from './pages/Dashboard';
 import AdminPage from './pages/Admin';
 import {ToastContainer} from 'react-toastify';
 import NominationPage from "./pages/NominationPage.jsx";
+import FaqPage from "./pages/FaqPage.jsx";
+import SettingsPage from "./pages/SettingsPage.jsx";
 
 export default function App() {
     const privateRoutes = [
@@ -12,6 +14,8 @@ export default function App() {
         {path: '/admin', title: 'Admin - Users', element: <AdminPage/>},
         {path: '/new-nomination', title: 'New Nomination', element: <NominationPage/>},
         {path: '/nominations/edit/:id', title: 'Edit Nomination', element: <NominationPage isEdit/>},
+        {path: '/faq', title: 'FAQ', element: <FaqPage/>},
+        {path: '/settings', title: 'Settings', element: <SettingsPage/>},
     ];
 
     return (

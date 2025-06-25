@@ -1,6 +1,6 @@
 import {useState} from 'react';
 import {useNavigate} from 'react-router-dom';
-import {Container, Form, Button, Alert, Row, Col} from 'react-bootstrap';
+import {Container, Form, Button, Row, Col} from 'react-bootstrap';
 import {toast} from 'react-toastify';
 import {useAuth} from "../services/utils.js";
 
@@ -28,8 +28,8 @@ export default function Login() {
                 <Col md={4}>
                     <h3 className="mb-3">Login</h3>
                     <Form onSubmit={handleSubmit}>
-                        <Form.Group className="mb-3">
-                            <Form.Label>Username</Form.Label>
+                        <Form.Group className="mb-3" controlId="username">
+                            <Form.Label column="">Username</Form.Label>
                             <Form.Control
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
@@ -37,8 +37,8 @@ export default function Login() {
                             />
                         </Form.Group>
 
-                        <Form.Group className="mb-3">
-                            <Form.Label>Password</Form.Label>
+                        <Form.Group className="mb-3" controlId="password">
+                            <Form.Label column="">Password</Form.Label>
                             <Form.Control
                                 type="password"
                                 value={password}

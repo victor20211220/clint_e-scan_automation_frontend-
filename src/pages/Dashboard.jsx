@@ -1,7 +1,7 @@
 import {useCallback, useEffect, useState} from 'react';
 import axios from '../services/axios';
 import {
-    Button, Modal, Card, Col, Container, Dropdown, Form, Row, Spinner, Table
+    Button, Modal, Card, Col, Container, Dropdown, Form, Row, Spinner, Table, Pagination
 } from 'react-bootstrap';
 import dayjs from 'dayjs';
 import {toast} from 'react-toastify';
@@ -27,7 +27,6 @@ const getRowClass = (nom) => {
     return 'text-secondary-emphasis';
 };
 
-
 export default function Dashboard() {
     const [nominations, setNominations] = useState([]);
     const [users, setUsers] = useState([]);
@@ -39,16 +38,24 @@ export default function Dashboard() {
     const [selectedNom, setSelectedNom] = useState(null);
     const [selectedUserId, setSelectedUserId] = useState('');
 
+    // Pagination states
+    const [currentPage, setCurrentPage] = useState(1);
+    const [limit, setLimit] = useState(10);
+    const [total, setTotal] = useState(0);
+
     const fetchNominations = useCallback(async () => {
         setLoading(true);
         try {
             const res = await axios.get('/nominations', {
                 params: {
                     user_id: filterUser,
-                    status: filterStatus
+                    status: filterStatus,
+                    page: currentPage,
+                    limit: limit
                 }
             });
             setNominations(res.data.nominations);
+            setTotal(res.data.total);
 
             const res1 = await axios.get('/nominations/stats/summary');
             setStats(res1.data);
@@ -57,7 +64,7 @@ export default function Dashboard() {
         } finally {
             setLoading(false);
         }
-    }, [filterUser, filterStatus]);
+    }, [filterUser, filterStatus, currentPage, limit]);
 
     const fetchUsers = async () => {
         const res = await axios.get('/users');
@@ -71,6 +78,11 @@ export default function Dashboard() {
     useEffect(() => {
         fetchNominations();
     }, [fetchNominations]);
+
+    // Reset to first page when filters change
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [filterUser, filterStatus]);
 
     const handleCardClick = (statusKey) => {
         setFilterStatus(statusKey);
@@ -89,7 +101,7 @@ export default function Dashboard() {
             });
             toast.success('User assigned');
             setShowAssignModal(false);
-            fetchNominations();
+            await fetchNominations();
         } catch (err) {
             toast.error(err.response?.data?.message || 'Failed to assign user');
         }
@@ -114,7 +126,7 @@ export default function Dashboard() {
             try {
                 await axios.delete(`/nominations/${id}`);
                 toast.success('Deleted successfully');
-                fetchNominations();
+                await fetchNominations();
             } catch (err) {
                 toast.error(err.response?.data?.message || 'Failed to delete');
             }
@@ -143,6 +155,57 @@ export default function Dashboard() {
 
     const [selectedIds, setSelectedIds] = useState([]);
 
+    // Calculate pagination values
+    const totalPages = Math.ceil(total / limit);
+    const startItem = (currentPage - 1) * limit + 1;
+    const endItem = Math.min(currentPage * limit, total);
+
+    // Generate pagination items
+    const renderPaginationItems = () => {
+        const items = [];
+
+        // First page
+        if (currentPage > 3) {
+            items.push(
+                <Pagination.Item key={1} onClick={() => setCurrentPage(1)}>
+                    1
+                </Pagination.Item>
+            );
+            if (currentPage > 4) {
+                items.push(<Pagination.Ellipsis key="start-ellipsis" />);
+            }
+        }
+
+        // Pages around current page
+        const startPage = Math.max(1, currentPage - 2);
+        const endPage = Math.min(totalPages, currentPage + 2);
+
+        for (let page = startPage; page <= endPage; page++) {
+            items.push(
+                <Pagination.Item
+                    key={page}
+                    active={page === currentPage}
+                    onClick={() => setCurrentPage(page)}
+                >
+                    {page}
+                </Pagination.Item>
+            );
+        }
+
+        // Last page
+        if (currentPage < totalPages - 2) {
+            if (currentPage < totalPages - 3) {
+                items.push(<Pagination.Ellipsis key="end-ellipsis" />);
+            }
+            items.push(
+                <Pagination.Item key={totalPages} onClick={() => setCurrentPage(totalPages)}>
+                    {totalPages}
+                </Pagination.Item>
+            );
+        }
+
+        return items;
+    };
 
     return (
         <Container fluid>
@@ -167,7 +230,7 @@ export default function Dashboard() {
             </Row>
 
             <Row className="mb-3">
-                <Col md={{span: 6}}>
+                <Col md={4}>
                     <Form.Select
                         className="mb-3"
                         value={filterUser}
@@ -179,7 +242,7 @@ export default function Dashboard() {
                         ))}
                     </Form.Select>
                 </Col>
-                <Col md={{span: 6}}>
+                <Col md={4}>
                     <Form.Select
                         onChange={async (e) => {
                             const action = e.target.value;
@@ -204,7 +267,7 @@ export default function Dashboard() {
                                     });
                                     toast.success('Bulk update done');
                                     setSelectedIds([]);
-                                    fetchNominations();
+                                    await fetchNominations();
                                 } catch (err) {
                                     toast.error(err.response?.data?.message || 'Failed to update');
                                 }
@@ -217,91 +280,137 @@ export default function Dashboard() {
                         <option value="sent">Mark as Sent</option>
                         <option value="received">Mark as Received</option>
                     </Form.Select>
-
+                </Col>
+                <Col md={4}>
+                    <Form.Select
+                        value={limit}
+                        onChange={(e) => {
+                            setLimit(Number(e.target.value));
+                            setCurrentPage(1);
+                        }}
+                    >
+                        <option value={10}>10 per page</option>
+                        <option value={25}>25 per page</option>
+                        <option value={50}>50 per page</option>
+                        <option value={100}>100 per page</option>
+                    </Form.Select>
                 </Col>
             </Row>
 
+            {/* Pagination Info */}
+            <Row className="mb-3">
+                <Col>
+                    <div className="d-flex justify-content-between align-items-center">
+                        <span className="text-muted">
+                            Showing {total > 0 ? startItem : 0} to {endItem} of {total} entries
+                        </span>
+                    </div>
+                </Col>
+            </Row>
 
             {loading ? (
                 <div className="text-center">
                     <Spinner animation="border"/>
                 </div>
             ) : (
-                <Table bordered hover responsive>
-                    <thead>
-                    <tr>
-                        <th>
-                            <Form.Check
-                                type="checkbox"
-                                onChange={(e) => {
-                                    if (e.target.checked) {
-                                        const allIds = nominations.map((n) => n._id);
-                                        setSelectedIds(allIds);
-                                    } else {
-                                        setSelectedIds([]);
-                                    }
-                                }}
-                                checked={nominations.length > 0 && selectedIds.length === nominations.length}
-                            />
-                        </th>
-                        <th>Contract</th>
-                        <th>Arrival / Nomination Date</th>
-                        <th>Type / Buyer & Seller</th>
-                        <th>Assigned User</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {nominations.map(nom => (
-                        <tr key={nom._id}>
-                            <td>
+                <>
+                    <Table bordered hover responsive>
+                        <thead>
+                        <tr>
+                            <th>
                                 <Form.Check
                                     type="checkbox"
-                                    checked={selectedIds.includes(nom._id)}
                                     onChange={(e) => {
                                         if (e.target.checked) {
-                                            setSelectedIds((prev) => [...prev, nom._id]);
+                                            const allIds = nominations.map((n) => n._id);
+                                            setSelectedIds(allIds);
                                         } else {
-                                            setSelectedIds((prev) => prev.filter((id) => id !== nom._id));
+                                            setSelectedIds([]);
                                         }
                                     }}
+                                    checked={nominations.length > 0 && selectedIds.length === nominations.length}
                                 />
-                            </td>
-                            <td className={getRowClass(nom)}>{nom.contract_name}</td>
-                            <td className={getRowClass(nom)}>
-                                {dayjs(nom.arrival_period).format('YYYY-MM-DD')}<br/>
-                                {dayjs(nom.nomination_date).format('YYYY-MM-DD')}
-                            </td>
-                            <td>
-                                {nom.nomination_type}<br/>
-                                Seller: {nom.seller} | Buyer: {nom.buyer}
-                            </td>
-                            <td className={getRowClass(nom)}>{nom.user_id?.name || ''}</td>
-                            <td className="text-primary">
-                                {nom.sent ? 'Sent' : nom.received ? 'Received' : ''}
-                            </td>
-                            <td>
-                                <Dropdown>
-                                    <Dropdown.Toggle variant="primary" size="sm">
-                                        Option
-                                    </Dropdown.Toggle>
-                                    <Dropdown.Menu>
-                                        <Dropdown.Item onClick={() => handleAssignUser(nom)}>Assign User</Dropdown.Item>
-                                        <Dropdown.Item onClick={() => handleEditNom(nom)}>Edit Nom</Dropdown.Item>
-                                        <Dropdown.Item onClick={() => handleDeleteNom(nom._id)}>Delete
-                                            Nom</Dropdown.Item><Dropdown.Item onClick={() => handleSendNom(nom._id)}>Send
-                                        Nom</Dropdown.Item>
-                                        <Dropdown.Item onClick={() => handleSendAllNom(nom._id)}>Send All
-                                            Nom</Dropdown.Item>
-                                    </Dropdown.Menu>
-                                </Dropdown>
-                            </td>
+                            </th>
+                            <th>Contract</th>
+                            <th>Arrival / Nomination Date</th>
+                            <th>Type / Buyer & Seller</th>
+                            <th>Assigned User</th>
+                            <th>Status</th>
+                            <th>Actions</th>
                         </tr>
-                    ))}
-                    </tbody>
-                </Table>
+                        </thead>
+                        <tbody>
+                        {nominations.map(nom => (
+                            <tr key={nom._id}>
+                                <td>
+                                    <Form.Check
+                                        type="checkbox"
+                                        checked={selectedIds.includes(nom._id)}
+                                        onChange={(e) => {
+                                            if (e.target.checked) {
+                                                setSelectedIds((prev) => [...prev, nom._id]);
+                                            } else {
+                                                setSelectedIds((prev) => prev.filter((id) => id !== nom._id));
+                                            }
+                                        }}
+                                    />
+                                </td>
+                                <td className={getRowClass(nom)}>{nom.contract_name}</td>
+                                <td className={getRowClass(nom)}>
+                                    {dayjs(nom.arrival_period).format('YYYY-MM-DD')}<br/>
+                                    {dayjs(nom.nomination_date).format('YYYY-MM-DD')}
+                                </td>
+                                <td>
+                                    {nom.nomination_type}<br/>
+                                    Seller: {nom.seller} | Buyer: {nom.buyer}
+                                </td>
+                                <td className={getRowClass(nom)}>{nom.user_id?.name || ''}</td>
+                                <td className="text-primary">
+                                    {nom.sent ? 'Sent' : nom.received ? 'Received' : ''}
+                                </td>
+                                <td>
+                                    <Dropdown>
+                                        <Dropdown.Toggle variant="primary" size="sm">
+                                            Option
+                                        </Dropdown.Toggle>
+                                        <Dropdown.Menu>
+                                            <Dropdown.Item onClick={() => handleAssignUser(nom)}>Assign User</Dropdown.Item>
+                                            <Dropdown.Item onClick={() => handleEditNom(nom)}>Edit Nom</Dropdown.Item>
+                                            <Dropdown.Item onClick={() => handleDeleteNom(nom._id)}>Delete
+                                                Nom</Dropdown.Item>
+                                            <Dropdown.Item onClick={() => handleSendNom(nom._id)}>Send
+                                                Nom</Dropdown.Item>
+                                            <Dropdown.Item onClick={() => handleSendAllNom(nom._id)}>Send All
+                                                Nom</Dropdown.Item>
+                                        </Dropdown.Menu>
+                                    </Dropdown>
+                                </td>
+                            </tr>
+                        ))}
+                        </tbody>
+                    </Table>
+
+                    {/* Pagination */}
+                    {totalPages > 1 && (
+                        <Row className="mt-4">
+                            <Col className="d-flex justify-content-center">
+                                <Pagination>
+                                    <Pagination.Prev
+                                        disabled={currentPage === 1}
+                                        onClick={() => setCurrentPage(currentPage - 1)}
+                                    />
+                                    {renderPaginationItems()}
+                                    <Pagination.Next
+                                        disabled={currentPage === totalPages}
+                                        onClick={() => setCurrentPage(currentPage + 1)}
+                                    />
+                                </Pagination>
+                            </Col>
+                        </Row>
+                    )}
+                </>
             )}
+
             <Modal show={showAssignModal} onHide={() => setShowAssignModal(false)}>
                 <Modal.Header closeButton><Modal.Title>Assign User</Modal.Title></Modal.Header>
                 <Modal.Body>
@@ -320,7 +429,6 @@ export default function Dashboard() {
                     <Button onClick={submitAssignUser}>Assign</Button>
                 </Modal.Footer>
             </Modal>
-
         </Container>
     );
 }
