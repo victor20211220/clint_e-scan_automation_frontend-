@@ -7,31 +7,31 @@ export const nominationStatsConfig = [
     {
         key: "all",
         label: "All",
-        class_name: "text-secondary-emphasis"
+        class_name: "secondary-emphasis"
     },
     {
         key: "this_month",
         label: "THIS MONTH",
-        class_name: "text-warning-emphasis"
+        class_name: "warning-emphasis"
     },
     {
         key: "this_week",
         label: "THIS WEEK",
-        class_name: "text-warning"
+        class_name: "warning"
     },
     {
         key: "on_today",
         label: "TODAY",
-        class_name: "text-danger"
+        class_name: "danger"
     },
     {
         key: "sent_received",
         label: "SENT/RECEIVED",
-        class_name: "text-success"
+        class_name: "success"
     },
     {
         key: "overdue",
         label: "OVERDUE",
-        class_name: "text-danger-emphasis"
+        class_name: "danger-emphasis"
     }
 ];

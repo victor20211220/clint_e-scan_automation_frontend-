@@ -6,25 +6,27 @@ import {
 import dayjs from 'dayjs';
 import {toast} from 'react-toastify';
 import Swal from 'sweetalert2';
-import {useNavigate} from 'react-router-dom';
+import {useLocation, useNavigate} from 'react-router-dom';
 import copy from 'copy-to-clipboard';
 import {nominationStatsConfig} from "../services/utils.js";
+import {faBars, faClipboardCheck} from "@fortawesome/free-solid-svg-icons";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 
 const getRowClass = (nom) => {
     const nominationDate = dayjs(nom.nomination_date);
     const now = dayjs();
 
-    if ((nom.sent || nom.received)) return 'text-success';
+    if ((nom.sent || nom.received)) return 'success';
 
-    if (nominationDate.isSame(now, 'day')) return 'text-danger';
+    if (nominationDate.isSame(now, 'day')) return 'danger';
 
-    if (nominationDate.isSame(now, 'week')) return 'text-warning';
+    if (nominationDate.isSame(now, 'week')) return 'warning';
 
-    if (nominationDate.isSame(now, 'month')) return 'text-warning-emphasis';
+    if (nominationDate.isSame(now, 'month')) return 'warning-emphasis';
 
-    if (nominationDate.isAfter(now)) return 'text-danger-emphasis';
+    if (nominationDate.isAfter(now)) return 'danger-emphasis';
 
-    return 'text-secondary-emphasis';
+    return 'secondary-emphasis';
 };
 
 export default function Dashboard() {
@@ -37,6 +39,9 @@ export default function Dashboard() {
     const [showAssignModal, setShowAssignModal] = useState(false);
     const [selectedNom, setSelectedNom] = useState(null);
     const [selectedUserId, setSelectedUserId] = useState('');
+    const location = useLocation();
+
+    const [settings, setSettings] = useState([]);
 
     // Pagination states
     const [currentPage, setCurrentPage] = useState(1);
@@ -59,6 +64,10 @@ export default function Dashboard() {
 
             const res1 = await axios.get('/nominations/stats/summary');
             setStats(res1.data);
+
+            const res2 = await axios.get('/settings');
+            setSettings(res2.data);
+
         } catch (err) {
             console.error(err);
         } finally {
@@ -78,6 +87,13 @@ export default function Dashboard() {
     useEffect(() => {
         fetchNominations();
     }, [fetchNominations]);
+
+    // Alternative: Refresh when location state changes (if you pass state)
+    useEffect(() => {
+        if (location.state?.refresh) {
+            fetchNominations();
+        }
+    }, [location.state]);
 
     // Reset to first page when filters change
     useEffect(() => {
@@ -159,6 +175,7 @@ export default function Dashboard() {
     const totalPages = Math.ceil(total / limit);
     const startItem = (currentPage - 1) * limit + 1;
     const endItem = Math.min(currentPage * limit, total);
+    const companyName = settings.find(s => s.key === "company_name")?.value;
 
     // Generate pagination items
     const renderPaginationItems = () => {
@@ -209,30 +226,35 @@ export default function Dashboard() {
 
     return (
         <Container fluid>
-            <h4 className="mt-3 mb-4 text-center">Nominations</h4>
+            <Card
+                bg="white"
+                className="border-0 shadow py-3 my-3"
+            >
+                <h3 className="text-center text-primary mb-0">Nominations</h3>
+            </Card>
 
             <Row className="mb-3">
                 {nominationStatsConfig.map(({key, label, class_name}) => (
-                    <Col key={key}>
+                    <Col key={key} md="4" lg="2" className="mb-3 d-flex align-items-stretch">
                         <Card
-                            bg="light"
-                            className="cursor-pointer"
+                            bg="white"
+                            className={`w-100 border-2 shadow cursor-pointer ${filterStatus === key ? "border-primary" : "border-white"}`}
                             onClick={() => handleCardClick(key)}
-                            style={{border: filterStatus === key ? '2px solid #007bff' : ''}}
                         >
-                            <Card.Body className={`text-center ${class_name}`}>
+                            <Card.Body className={`text-center text-${class_name}`}>
                                 <strong>{label}</strong><br/>
                                 {stats[key] || 0}
                             </Card.Body>
                         </Card>
                     </Col>
+
                 ))}
             </Row>
 
             <Row className="mb-3">
-                <Col md={4}>
+                <Col md={6}>
                     <Form.Select
-                        className="mb-3"
+                        className="mb-3 border-0 shadow"
                         value={filterUser}
                         onChange={(e) => setFilterUser(e.target.value)}
                     >
@@ -242,7 +264,7 @@ export default function Dashboard() {
                         ))}
                     </Form.Select>
                 </Col>
-                <Col md={4}>
+                <Col md={6}>
                     <Form.Select
                         onChange={async (e) => {
                             const action = e.target.value;
@@ -275,19 +297,27 @@ export default function Dashboard() {
 
                             e.target.value = '';
                         }}
+
+                        className={"border-0 shadow"}
                     >
                         <option value="">Bulk Action</option>
                         <option value="sent">Mark as Sent</option>
                         <option value="received">Mark as Received</option>
                     </Form.Select>
                 </Col>
-                <Col md={4}>
+            </Row>
+
+
+            {/* Pagination Info */}
+            <Row className="mb-3">
+                <Col md={3}>
                     <Form.Select
                         value={limit}
                         onChange={(e) => {
                             setLimit(Number(e.target.value));
                             setCurrentPage(1);
                         }}
+                        className={`border-0 shadow`}
                     >
                         <option value={10}>10 per page</option>
                         <option value={25}>25 per page</option>
@@ -295,15 +325,9 @@ export default function Dashboard() {
                         <option value={100}>100 per page</option>
                     </Form.Select>
                 </Col>
-            </Row>
-
-            {/* Pagination Info */}
-            <Row className="mb-3">
                 <Col>
                     <div className="d-flex justify-content-between align-items-center">
-                        <span className="text-muted">
-                            Showing {total > 0 ? startItem : 0} to {endItem} of {total} entries
-                        </span>
+                        Showing {total > 0 ? startItem : 0} to {endItem} of total {total} entries
                     </div>
                 </Col>
             </Row>
@@ -313,11 +337,11 @@ export default function Dashboard() {
                     <Spinner animation="border"/>
                 </div>
             ) : (
-                <>
-                    <Table bordered hover responsive>
+                <Card bg="white" className="cursor-pointer border-0 shadow p-3 table-responsive-xxl">
+                    <Table striped hover className="align-middle">
                         <thead>
                         <tr>
-                            <th>
+                            <th width={"50"}>
                                 <Form.Check
                                     type="checkbox"
                                     onChange={(e) => {
@@ -332,7 +356,7 @@ export default function Dashboard() {
                                 />
                             </th>
                             <th>Contract</th>
-                            <th>Arrival / Nomination Date</th>
+                            <th>Date</th>
                             <th>Type / Buyer & Seller</th>
                             <th>Assigned User</th>
                             <th>Status</th>
@@ -342,7 +366,7 @@ export default function Dashboard() {
                         <tbody>
                         {nominations.map(nom => (
                             <tr key={nom._id}>
-                                <td>
+                                <td width={"50"}>
                                     <Form.Check
                                         type="checkbox"
                                         checked={selectedIds.includes(nom._id)}
@@ -355,26 +379,38 @@ export default function Dashboard() {
                                         }}
                                     />
                                 </td>
-                                <td className={getRowClass(nom)}>{nom.contract_name}</td>
-                                <td className={getRowClass(nom)}>
-                                    {dayjs(nom.arrival_period).format('YYYY-MM-DD')}<br/>
-                                    {dayjs(nom.nomination_date).format('YYYY-MM-DD')}
+                                <td className={`text-${getRowClass(nom)}`}>
+                                    <h5>{nom.contract_name}</h5>
+                                </td>
+                                <td className={`text-${getRowClass(nom)}`}>
+                                    <h5>{dayjs(nom.arrival_period).format('DD MMM')}</h5>
+                                    {dayjs(nom.nomination_date).format('DD MMM')}
+                                </td>
+                                <td className="text-primary">
+                                    <h5>{nom.nomination_type}</h5>
+                                    {/*Seller: {nom.seller.slice(0, 7)} | Buyer: {nom.buyer.slice(0, 7)}*/}
+                                    Seller: {companyName === nom.seller ? <b><i>{nom.seller}</i></b> : nom.seller} |
+                                    Buyer: {companyName === nom.buyer ? <b><i>{nom.buyer}</i></b> : nom.buyer}
                                 </td>
                                 <td>
-                                    {nom.nomination_type}<br/>
-                                    Seller: {nom.seller} | Buyer: {nom.buyer}
-                                </td>
-                                <td className={getRowClass(nom)}>{nom.user_id?.name || ''}</td>
+                                    {nom.user_id &&
+                                        <h5 className={`bg-${getRowClass(nom)} rounded-2 p-2 d-inline-block text-white mb-0`}>{nom.user_id.name}</h5>}</td>
                                 <td className="text-primary">
-                                    {nom.sent ? 'Sent' : nom.received ? 'Received' : ''}
+                                    {(nom.sent || nom.received) && <div>
+                                        <FontAwesomeIcon icon={faClipboardCheck} size="lg" className="me-2"/>
+                                        <h6 className="d-inline-block mb-0">{nom.sent ? 'SENT' : nom.received ? 'RECEIVED' : ''}</h6>
+                                    </div>}
                                 </td>
                                 <td>
                                     <Dropdown>
-                                        <Dropdown.Toggle variant="primary" size="sm">
-                                            Option
+                                        <Dropdown.Toggle variant="transparent" size="lg"
+                                                         className="text-primary border-0 p-0">
+                                            <FontAwesomeIcon icon={faBars} className="me-2" size="lg"/>
+                                            <h6 className="d-inline-block mb-0">OPTIONS</h6>
                                         </Dropdown.Toggle>
                                         <Dropdown.Menu>
-                                            <Dropdown.Item onClick={() => handleAssignUser(nom)}>Assign User</Dropdown.Item>
+                                            <Dropdown.Item onClick={() => handleAssignUser(nom)}>Assign
+                                                User</Dropdown.Item>
                                             <Dropdown.Item onClick={() => handleEditNom(nom)}>Edit Nom</Dropdown.Item>
                                             <Dropdown.Item onClick={() => handleDeleteNom(nom._id)}>Delete
                                                 Nom</Dropdown.Item>
@@ -408,7 +444,7 @@ export default function Dashboard() {
                             </Col>
                         </Row>
                     )}
-                </>
+                </Card>
             )}
 
             <Modal show={showAssignModal} onHide={() => setShowAssignModal(false)}>
