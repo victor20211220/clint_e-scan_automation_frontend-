@@ -3,7 +3,7 @@
 }
 
 #appMenu {
-    background-image: url('src/assets/images/menu_repeat.png');
+    background-image: url('../images/menu_repeat.png');
     background-size: 100% 100%;
     background-repeat: no-repeat;
     width: 300px;
@@ -15,7 +15,7 @@
 #mainContent {
     background: rgba(var(--bs-emphasis-color-rgb), 0.05);
     &.nominations-page{
-        background-image: url('src/assets/images/background.jpg')
+        background-image: url('../images/background.jpg')
     }
 }
 
