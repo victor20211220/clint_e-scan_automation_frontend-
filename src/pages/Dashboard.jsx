@@ -24,7 +24,7 @@ const getRowClass = (nom) => {
 
     if (nominationDate.isSame(now, 'month')) return 'warning-emphasis';
 
-    if (nominationDate.isAfter(now)) return 'danger-emphasis';
+    if (nominationDate.isSame(now, 'day') || nominationDate.isBefore(now)) return 'danger-emphasis';
 
     return 'secondary-emphasis';
 };
@@ -189,7 +189,7 @@ export default function Dashboard() {
                 </Pagination.Item>
             );
             if (currentPage > 4) {
-                items.push(<Pagination.Ellipsis key="start-ellipsis" />);
+                items.push(<Pagination.Ellipsis key="start-ellipsis"/>);
             }
         }
 
@@ -212,7 +212,7 @@ export default function Dashboard() {
         // Last page
         if (currentPage < totalPages - 2) {
             if (currentPage < totalPages - 3) {
-                items.push(<Pagination.Ellipsis key="end-ellipsis" />);
+                items.push(<Pagination.Ellipsis key="end-ellipsis"/>);
             }
             items.push(
                 <Pagination.Item key={totalPages} onClick={() => setCurrentPage(totalPages)}>
