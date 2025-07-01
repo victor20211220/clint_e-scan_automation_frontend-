@@ -49,6 +49,7 @@ export default function Dashboard() {
     const [total, setTotal] = useState(0);
 
     const fetchNominations = useCallback(async () => {
+        console.log('fetching nominations');
         setLoading(true);
         try {
             const res = await axios.get('/nominations', {
@@ -88,12 +89,12 @@ export default function Dashboard() {
         fetchNominations();
     }, [fetchNominations]);
 
-    // Alternative: Refresh when location state changes (if you pass state)
+    // Refetch on location.state?.refresh
     useEffect(() => {
         if (location.state?.refresh) {
             fetchNominations();
         }
-    }, [location.state]);
+    }, [location.state, fetchNominations]);
 
     // Reset to first page when filters change
     useEffect(() => {
@@ -275,19 +276,21 @@ export default function Dashboard() {
 
                             const confirm = await Swal.fire({
                                 title: 'Are you sure?',
-                                text: `Mark ${selectedIds.length} nomination(s) as ${action}?`,
-                                icon: 'warning',
+                                text: action === 'delete'
+                                    ? `Delete selected ${selectedIds.length} nomination(s)?`
+                                    : `Mark ${selectedIds.length} nomination(s) as ${action}?`,
+                                icon: action === 'delete' ? 'error' : 'warning',
                                 showCancelButton: true,
-                                confirmButtonText: 'Yes, update it!',
+                                confirmButtonText: action === 'delete' ? 'Yes, delete them!' : 'Yes, update it!',
                             });
 
                             if (confirm.isConfirmed) {
                                 try {
-                                    await axios.put('/nominations/bulk-update-status', {
+                                    const res = await axios.put('/nominations/bulk-update-status', {
                                         ids: selectedIds,
-                                        action: action,
+                                        action,
                                     });
-                                    toast.success('Bulk update done');
+                                    toast.success(res.data.message);
                                     setSelectedIds([]);
                                     await fetchNominations();
                                 } catch (err) {
@@ -297,12 +300,12 @@ export default function Dashboard() {
 
                             e.target.value = '';
                         }}
-
                         className={"border-0 shadow"}
                     >
                         <option value="">Bulk Action</option>
                         <option value="sent">Mark as Sent</option>
                         <option value="received">Mark as Received</option>
+                        <option value="delete">Delete Noms</option>
                     </Form.Select>
                 </Col>
             </Row>
@@ -388,9 +391,10 @@ export default function Dashboard() {
                                 </td>
                                 <td className="text-primary">
                                     <h5>{nom.nomination_type}</h5>
-                                    {/*Seller: {nom.seller.slice(0, 7)} | Buyer: {nom.buyer.slice(0, 7)}*/}
                                     Seller: {companyName === nom.seller ? <b><i>{nom.seller}</i></b> : nom.seller} |
                                     Buyer: {companyName === nom.buyer ? <b><i>{nom.buyer}</i></b> : nom.buyer}
+                                    <br/>
+                                    <small><i>{nom.nomination_description}</i></small>
                                 </td>
                                 <td>
                                     {nom.user_id &&

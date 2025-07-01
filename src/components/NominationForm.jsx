@@ -13,6 +13,7 @@ export default function NominationForm({isEdit = false, initialValues = {}}) {
         nomination_date: initialValues.nomination_date?.slice(0, 10) || '',
         nomination_type: initialValues.nomination_type || '',
         nomination_keyword: initialValues.nomination_keyword || '',
+        nomination_description: initialValues.nomination_description || '',
         for_seller_or_buyer: initialValues.for_seller_or_buyer || 'seller',
     });
 
@@ -77,6 +78,17 @@ export default function NominationForm({isEdit = false, initialValues = {}}) {
                         <Form.Label column="">Nomination Keyword</Form.Label>
                         <Form.Control name="nomination_keyword" value={formData.nomination_keyword}
                                       onChange={handleChange} required/>
+                    </Form.Group>
+                    <Form.Group controlId="nomination_description" className="mb-3">
+                        <Form.Label column="">Nomination Description</Form.Label>
+                        <Form.Control
+                            as="textarea"
+                            rows={4}
+                            name="nomination_description"
+                            value={formData.nomination_description}
+                            onChange={handleChange}
+                            required
+                        />
                     </Form.Group>
                     <Form.Group controlId="for_seller_or_buyer" className="mb-3">
                         <Form.Label column="">For</Form.Label>
