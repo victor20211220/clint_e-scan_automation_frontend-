@@ -3,13 +3,18 @@
 }
 
 #appMenu {
-    background-image: url('../images/menu_repeat.png');
-    background-size: 100% 100%;
-    background-repeat: no-repeat;
-    width: 300px;
+    //background-image: url('../images/menu_repeat.png');
+    //background-size: 100% 100%;
+    //background-repeat: no-repeat;
+    //width: 300px;
+    background-color: oklch(14.1% .005 285.823);
 
     .logo-tracker-text {
         letter-spacing: 6px;
+    }
+
+    svg{
+        color: oklch(55.2% .016 285.938);
     }
 }
 
@@ -17,7 +22,7 @@
     background: rgba(var(--bs-emphasis-color-rgb), 0.05);
 
     &.nominations-page {
-        background-image: url('../images/background.jpg')
+        //background-image: url('../images/background.jpg')
     }
 }
 

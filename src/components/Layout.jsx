@@ -48,7 +48,7 @@ export default function Layout({children}) {
                             </span>
                     </Nav.Link>
                 </div>
-                <Nav className="flex-column mb-auto">
+                <Nav className="flex-column mb-auto px-1">
                     <Nav.Link as={Link} to="/"
                               className="text-white text-decoration-none mb-1 fw-medium">
                         <FontAwesomeIcon icon={faHouseChimney} className="me-2"/>Nominations</Nav.Link>

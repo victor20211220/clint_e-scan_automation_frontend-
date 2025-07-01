@@ -24,7 +24,7 @@ const getRowClass = (nom) => {
 
     if (nominationDate.isSame(now, 'month')) return 'warning-emphasis';
 
-    if (nominationDate.isSame(now, 'day') || nominationDate.isBefore(now)) return 'danger-emphasis';
+    if (nominationDate.isBefore(now, 'day')) return 'danger-emphasis';
 
     return 'secondary-emphasis';
 };
