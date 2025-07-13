@@ -358,7 +358,7 @@ export default function Dashboard() {
                                     checked={nominations.length > 0 && selectedIds.length === nominations.length}
                                 />
                             </th>
-                            <th>Contract</th>
+                            <th className="fit-column">Contract</th>
                             <th>Date</th>
                             <th>Type / Buyer & Seller</th>
                             <th>Assigned User</th>
@@ -382,7 +382,7 @@ export default function Dashboard() {
                                         }}
                                     />
                                 </td>
-                                <td className={`text-${getRowClass(nom)}`}>
+                                <td className={`text-${getRowClass(nom)} fit-column`}>
                                     <h5>{nom.contract_name}</h5>
                                 </td>
                                 <td className={`text-${getRowClass(nom)}`}>

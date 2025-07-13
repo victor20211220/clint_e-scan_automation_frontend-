@@ -41,9 +41,8 @@ export default function Layout({children}) {
                     <Nav.Link as={Link} to="/"
                               className="text-white text-decoration-none px-3">
                         <img src={logoImg} alt="" width="300" className="img-fluid"/><br/>
-                        <span className="d-flex align-items-center gap-2">
-                            <h5 className="mb-0">Operator</h5>
-                            <span className="logo-tracker-text fw-light">Workbench</span>
+                        <span className="d-flex align-items-center gap-0 justify-content-center fw-light">
+                            <h5 className="mb-0">LNG OWB</h5>
                         </span>
                     </Nav.Link>
                 </div>
