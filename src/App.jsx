@@ -5,8 +5,9 @@ import Dashboard from './pages/Dashboard';
 import AdminPage from './pages/Admin';
 import {ToastContainer} from 'react-toastify';
 import NominationPage from "./pages/NominationPage.jsx";
-import FaqPage from "./pages/FaqPage.jsx";
-import SettingsPage from "./pages/SettingsPage.jsx";
+import CargoSchedulePage from './pages/CargoSchedulePage.jsx';
+import CargoMatchingPage from './pages/CargoMatchingPage.jsx';
+import DocInstructionsPage from "./pages/DocInstructionsPage.jsx";
 
 export default function App() {
     const privateRoutes = [
@@ -14,8 +15,9 @@ export default function App() {
         {path: '/admin', title: 'Admin - Users', element: <AdminPage/>},
         {path: '/new-nomination', title: 'New Nomination', element: <NominationPage/>},
         {path: '/nominations/edit/:id', title: 'Edit Nomination', element: <NominationPage isEdit/>},
-        {path: '/faq', title: 'FAQ', element: <FaqPage/>},
-        {path: '/settings', title: 'Settings', element: <SettingsPage/>},
+        {path: '/cargo-schedule', title: 'Cargo Schedule', element: <CargoSchedulePage/>},
+        {path: '/cargo-matching', title: 'Cargo Matching', element: <CargoMatchingPage/>},
+        {path: '/doc-instructions', title: 'Doc Instructions', element: <DocInstructionsPage/>},
     ];
 
     return (

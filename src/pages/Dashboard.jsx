@@ -45,7 +45,7 @@ export default function Dashboard() {
 
     // Pagination states
     const [currentPage, setCurrentPage] = useState(1);
-    const [limit, setLimit] = useState(10);
+    const [limit, setLimit] = useState(50);
     const [total, setTotal] = useState(0);
 
     const fetchNominations = useCallback(async () => {
