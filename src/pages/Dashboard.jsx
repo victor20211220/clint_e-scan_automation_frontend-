@@ -386,8 +386,8 @@ export default function Dashboard() {
                                     <h5>{nom.contract_name}</h5>
                                 </td>
                                 <td className={`text-${getRowClass(nom)}`}>
-                                    <h5>{dayjs(nom.arrival_period).format('DD MMM')}</h5>
-                                    {dayjs(nom.nomination_date).format('DD MMM')}
+                                    <h5>{dayjs(nom.nomination_date).format('DD MMM')}</h5>
+                                    {dayjs(nom.arrival_period).format('DD MMM')}
                                 </td>
                                 <td className="text-primary">
                                     <h5>{nom.nomination_type}</h5>
